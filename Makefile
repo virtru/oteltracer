@@ -1,8 +1,4 @@
 COVERAGE_THRESH_PCT=0
-# These are used by several Go projects in `data-clean-room`
-# Normally we'd fetch these from Git repos, or have a monorepo layout
-# that didn't make sharing Go modules hard
-# So cheat and copy them
 .PHONY: prep
 prep: clean
 	@echo "Making sure Go is installed"
