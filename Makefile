@@ -5,6 +5,8 @@ prep: clean
 	@go version
 	@echo "Making sure golangci-lint is installed"
 	@golangci-lint version
+	@echo "Making sure overcover is installed"
+	@overcover -h
 
 .PHONY: test
 test: lint
