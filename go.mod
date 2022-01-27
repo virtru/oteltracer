@@ -1,4 +1,4 @@
-module github.com/virtru/v2/oteltracer
+module github.com/virtru-corp/oteltracer
 
 go 1.15
 
