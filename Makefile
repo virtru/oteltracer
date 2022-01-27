@@ -1,0 +1,29 @@
+COVERAGE_THRESH_PCT=0
+# These are used by several Go projects in `data-clean-room`
+# Normally we'd fetch these from Git repos, or have a monorepo layout
+# that didn't make sharing Go modules hard
+# So cheat and copy them
+.PHONY: prep
+prep: clean
+	@echo "Making sure Go is installed"
+	@go version
+	@echo "Making sure golangci-lint is installed"
+	@golangci-lint version
+
+.PHONY: test
+test: lint
+	go test --coverprofile cover.out ./...
+	overcover --coverprofile cover.out ./... --threshold $(COVERAGE_THRESH_PCT)
+
+.PHONY: lint
+lint:
+	golangci-lint run --timeout 5m
+
+.PHONY: build
+build:
+	go build
+
+#List targets in makefile
+.PHONY: list
+list:
+	@$(MAKE) -pRrq -f $(lastword $(MAKEFILE_LIST)) : 2>/dev/null | awk -v RS= -F: '/^# File/,/^# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | sort | egrep -v -e '^[^[:alnum:]]' -e '^$@$$'
