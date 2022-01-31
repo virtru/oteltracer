@@ -10,6 +10,7 @@ import (
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/propagation"
 
+	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
@@ -19,9 +20,26 @@ import (
 
 var otelGRPCCollector = os.Getenv("OTLP_COLLECTOR_ENDPOINT") //ex. localhost:4345
 
-func InitTracer(serviceName string) func() {
+func InitTracer(serviceName string) (func(), error) {
 	var shutdownFunc func()
 	var err error
+	if otelGRPCCollector == "" {
+		exp, err := stdouttrace.New(
+			stdouttrace.WithPrettyPrint(),
+		)
+		if err != nil {
+			return shutdownFunc, err
+		}
+		tp := sdktrace.NewTracerProvider(
+			sdktrace.WithSampler(sdktrace.AlwaysSample()),
+			sdktrace.WithSyncer(exp),
+		)
+		otel.SetTracerProvider(tp)
+		shutdownFunc = func() {
+			log.Printf("Shutting down stdout tracer")
+		}
+		return shutdownFunc, nil
+	}
 
 	log.Printf("Starting OpenTelemetry tracer: otlp, configured with endpoint: %s", otelGRPCCollector)
 	otlpTracerCtx := context.Background()
@@ -38,10 +56,12 @@ func InitTracer(serviceName string) func() {
 	)
 	if err != nil {
 		log.Fatalf("failed to create otlp driver: %v", err)
+		return shutdownFunc, err
 	}
 	exporter, err := otlptrace.New(otlpTracerCtx, client)
 	if err != nil {
 		log.Fatalf("failed to create exporter: %v", err)
+		return shutdownFunc, err
 	}
 	// Return a shutdown func the caller can use to dispose tracer connection
 	shutdownFunc = func() {
@@ -61,5 +81,5 @@ func InitTracer(serviceName string) func() {
 	otel.SetTracerProvider(tp)
 	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{}))
 
-	return shutdownFunc
+	return shutdownFunc, nil
 }
