@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    chart: "{{ $.Chart.Name }}-{{ $.Chart.Version }}"
+    release: "{{ $.Release.Name }}"
+    heritage: "{{ $.Release.Service }}"
+spec:
+  ports:
+  - name: otlp # Default endpoint for OpenTelemetry receiver.
+    port: {{ .Values.ports.otlpPort }}
+    protocol: TCP
+    appProtocol: grpc
+    targetPort: {{ .Values.ports.otlpPort }}
+  - name: metrics # Default endpoint for querying metrics.
+    port: {{ .Values.ports.metricsPort }}
+  selector:
+    app: {{ .Values.name }}

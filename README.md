@@ -47,6 +47,10 @@ func getHealthzHandler() http.Handler {
 }
 ```
 
+## Example Collector
+
+An example OpenTelemetry collector Helm chart that does Datadog forwarding can be found in [example/collector](example/collector)
+
 ## Versioning/releases/changelog
 
 See CONTRIBUTING.md
