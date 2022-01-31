@@ -1,0 +1,16 @@
+name: 'otel-collector'
+replicaCount: 1
+namespace: otel
+image:
+  name: otel/opentelemetry-collector-contrib:0.18.0
+  pullPolicy: Always
+ports:
+  metricsPort: 8888
+  otlpPort: 55680
+  zpagesPort: 55679
+configName: otel-collector-config
+
+datadog:
+  apiKey: injectedatinstalltimeviaenvvar
+  env: "h3dev"
+  service: "data-science-cleanroom"
