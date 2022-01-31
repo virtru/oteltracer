@@ -8,7 +8,7 @@ We follow the [semver](https://semver.org/spec/v2.0.0.html) guidelines on versio
 * Cosmetic changes should _not_ affect the version number. (Example: Fixing typos, reformatting docs.)
 
 #### Tracking Versions
-Rather than use a CHANGELOG or VERSION file, we ask that you use annotated `git tags` when bumping the spec Semver, and use the annotation message to describe the change.
+Rather than use a CHANGELOG or VERSION file, we ask that you use annotated `git tags` when bumping the Semver, and use the annotation message to describe the change.
 > Example: `git tag -s 4.1.0 -m "version 4.1.0 - twiddled a doohickey"`)
 
 Please use the raw semver when tagging - no `v4.1.0`, just `4.1.0`
@@ -18,6 +18,9 @@ A list of `git tag` versions and their annotations can be generated at will via 
 To create a CHANGELOG file, run the following command
 
 `git tag -n --sort=-v:refname > CHANGELOG`
+
+#### Releasing Versions
+Releases are simply cut from annotated Git tags. Annotated git tags are created as described above.
 
 ## Asking Questions & Submitting Feeback
 
