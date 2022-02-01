@@ -1,16 +1,35 @@
-name: 'otel-collector'
-replicaCount: 1
-namespace: otel
 image:
-  name: otel/opentelemetry-collector-contrib:0.18.0
-  pullPolicy: Always
-ports:
-  metricsPort: 8888
-  otlpPort: 55680
-  zpagesPort: 55679
-configName: otel-collector-config
-
-datadog:
-  apiKey: injectedatinstalltimeviaenvvar
-  env: "h3dev"
-  service: "data-science-cleanroom"
+  repository: otel/opentelemetry-collector-contrib
+  tag: 0.43.0
+agentCollector:
+  enabled: false
+standaloneCollector:
+  enabled: true
+  extraEnvs:
+    - name: DD_API_KEY
+      valueFrom:
+        secretKeyRef:
+          name: otel-datadog-secrets
+          key: DD_API_KEY
+  configOverride:
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+          http:
+    extensions:
+      health_check: {}
+    exporters:
+      datadog/api:
+        env: development
+        version: 0.43.0
+        tags:
+          - source:develop-green-otel
+        api:
+          key:"$DD_API_KEY"
+    service:
+      extensions: [health_check]
+      pipelines:
+        traces:
+          receivers: [otlp]
+          exporters: [datadog/api]
