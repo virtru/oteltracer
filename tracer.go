@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"os"
+	"time"
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
@@ -42,7 +43,8 @@ func InitTracer(serviceName string) (func(), error) {
 	}
 
 	log.Printf("Starting OpenTelemetry tracer: otlp, configured with endpoint: %s", otelGRPCCollector)
-	otlpTracerCtx := context.Background()
+	//Create a bounded context so we don't block indefinitely waiting to connect
+	otlpTracerCtx, otlpContextCancel := context.WithTimeout(context.Background(), time.Second*10)
 
 	// If the OpenTelemetry Collector is running on a local cluster (minikube or
 	// microk8s), it should be accessible through the NodePort service at the
@@ -52,7 +54,7 @@ func InitTracer(serviceName string) (func(), error) {
 	client := otlptracegrpc.NewClient(
 		otlptracegrpc.WithInsecure(),
 		otlptracegrpc.WithEndpoint(otelGRPCCollector),
-		otlptracegrpc.WithDialOption(grpc.WithBlock()), // useful for testing
+		otlptracegrpc.WithDialOption(grpc.WithBlock()), // Block calling app unless and until we make a connection, unless our context times out first
 	)
 	if err != nil {
 		log.Fatalf("failed to create otlp driver: %v", err)
@@ -70,6 +72,9 @@ func InitTracer(serviceName string) (func(), error) {
 		if err != nil {
 			log.Fatalf("failed to stop exporter: %v", err)
 		}
+		//Now that the exporter is shutdown, cancel our background context
+		otlpContextCancel()
+
 	}
 
 	// For the demonstration, use sdktrace.AlwaysSample sampler to sample all traces.
