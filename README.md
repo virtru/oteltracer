@@ -32,9 +32,9 @@ Use it an a garden-variety handler:
 // healthz is a liveness probe.
 func getHealthzHandler() http.Handler {
     healthzHandler := func(w http.ResponseWriter, req *http.Request) {
-        //Obtain a Golang Context object from the request - if the incoming request
-        //has otel request tracing headers on it, those will be propagated/linked
-        //with whatever uses this Context object as a starting point.
+        // Obtain a Golang Context object from the request - if the incoming request
+        // has otel request tracing headers on it, those will be propagated/linked
+        // with whatever uses this Context object as a starting point.
         ctx := req.Context()
         // This will get the global registered Tracer instance that `otelTracer.InitTracer("name")`
         // initialized and registered, and start a Span.
