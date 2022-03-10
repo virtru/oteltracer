@@ -57,12 +57,14 @@ func InitTracer(serviceName string) (func(), error) {
 		otlptracegrpc.WithDialOption(grpc.WithBlock()), // Block calling app unless and until we make a connection, unless our context times out first
 	)
 	if err != nil {
-		log.Fatalf("failed to create otlp driver: %v", err)
+		log.Printf("ERROR: failed to create otlp driver: %v", err)
+		otlpContextCancel()
 		return shutdownFunc, err
 	}
 	exporter, err := otlptrace.New(otlpTracerCtx, client)
 	if err != nil {
-		log.Fatalf("failed to create exporter: %v", err)
+		log.Printf("ERROR: failed to create exporter: %v", err)
+		otlpContextCancel()
 		return shutdownFunc, err
 	}
 	// Return a shutdown func the caller can use to dispose tracer connection
@@ -70,7 +72,7 @@ func InitTracer(serviceName string) (func(), error) {
 		log.Printf("Shutting down otlp tracer")
 		err := exporter.Shutdown(otlpTracerCtx)
 		if err != nil {
-			log.Fatalf("failed to stop exporter: %v", err)
+			log.Printf("ERROR: failed to stop exporter: %v", err)
 		}
 		//Now that the exporter is shutdown, cancel our background context
 		otlpContextCancel()
