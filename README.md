@@ -13,7 +13,7 @@ This wrapper is designed to write to a Collector/Forwarder service that supports
 
     ``` go
     import (
-        "github.com/virtru-corp/oteltracer"
+        "github.com/virtru/oteltracer"
     )
     ```
 
