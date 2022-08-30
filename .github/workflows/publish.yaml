@@ -1,0 +1,35 @@
+name: Tag + Godoc Publish On Main Push
+
+on:
+  push:
+    branches:
+      - main
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+          contents: write
+    steps:
+      - uses: actions/setup-go@v3
+        with:
+          go-version: 1.19
+      - uses: actions/checkout@v3
+      - name: Bump version and push tag
+        id: tag-rel
+        uses: anothrNick/github-tag-action@1.39.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WITH_V: true
+          DEFAULT_BUMP: patch
+      - name: Publish doc to go.dev packages
+        run: |
+          git pull
+          export latest="$(git describe --tags `git rev-list --tags --max-count=1`)"
+          curl https://proxy.golang.org/github.com/virtru/oteltracer/@v/$latest.info
+      - uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ steps.tag-rel.outputs.new_tag }}
+          allowUpdates: true
+          omitBodyDuringUpdate: true
+          generateReleaseNotes: true
+          token: ${{ secrets.GITHUB_TOKEN }}
