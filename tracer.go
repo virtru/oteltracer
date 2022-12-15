@@ -19,7 +19,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-var otelGRPCCollector = os.Getenv("OTLP_COLLECTOR_ENDPOINT") //ex. localhost:4345
+var otelGRPCCollector = os.Getenv("OTLP_COLLECTOR_ENDPOINT") // ex. localhost:4345
 
 func InitTracer(serviceName string) (func(), error) {
 	var shutdownFunc func()
@@ -43,7 +43,7 @@ func InitTracer(serviceName string) (func(), error) {
 	}
 
 	log.Printf("Starting OpenTelemetry tracer: otlp, configured with endpoint: %s", otelGRPCCollector)
-	//Create a bounded context so we don't block indefinitely waiting to connect
+	// Create a bounded context so we don't block indefinitely waiting to connect
 	otlpTracerCtx, otlpContextCancel := context.WithTimeout(context.Background(), time.Second*10)
 
 	// If the OpenTelemetry Collector is running on a local cluster (minikube or
@@ -67,6 +67,7 @@ func InitTracer(serviceName string) (func(), error) {
 		otlpContextCancel()
 		return shutdownFunc, err
 	}
+
 	// Return a shutdown func the caller can use to dispose tracer connection
 	shutdownFunc = func() {
 		log.Printf("Shutting down otlp tracer")
@@ -74,9 +75,8 @@ func InitTracer(serviceName string) (func(), error) {
 		if err != nil {
 			log.Printf("ERROR: failed to stop exporter: %v", err)
 		}
-		//Now that the exporter is shutdown, cancel our background context
+		// Now that the exporter is shutdown, cancel our background context
 		otlpContextCancel()
-
 	}
 
 	// For the demonstration, use sdktrace.AlwaysSample sampler to sample all traces.
