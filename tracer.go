@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/propagation"
@@ -21,9 +22,13 @@ import (
 
 var otelGRPCCollector = os.Getenv("OTLP_COLLECTOR_ENDPOINT") // ex. localhost:4345
 
-func InitTracer(serviceName string) (func(), error) {
+func InitTracer(serviceName string, attr ...attribute.KeyValue) (func(), error) {
 	var shutdownFunc func()
 	var err error
+
+	//Appending service.name attribute to extra attributes being passed in.
+	attr = append(attr, semconv.ServiceNameKey.String(serviceName))
+
 	if otelGRPCCollector == "" {
 		exp, err := stdouttrace.New(
 			stdouttrace.WithPrettyPrint(),
@@ -34,6 +39,7 @@ func InitTracer(serviceName string) (func(), error) {
 		tp := sdktrace.NewTracerProvider(
 			sdktrace.WithSampler(sdktrace.AlwaysSample()),
 			sdktrace.WithSyncer(exp),
+			sdktrace.WithResource(resource.NewWithAttributes(semconv.SchemaURL, attr...)),
 		)
 		otel.SetTracerProvider(tp)
 		shutdownFunc = func() {
@@ -81,10 +87,11 @@ func InitTracer(serviceName string) (func(), error) {
 
 	// For the demonstration, use sdktrace.AlwaysSample sampler to sample all traces.
 	// 	In a production application, use sdktrace.ProbabilitySampler with a desired probability.
+
 	tp := sdktrace.NewTracerProvider(
 		sdktrace.WithSampler(sdktrace.AlwaysSample()),
 		sdktrace.WithSyncer(exporter),
-		sdktrace.WithResource(resource.NewWithAttributes(semconv.SchemaURL, semconv.ServiceNameKey.String(serviceName))))
+		sdktrace.WithResource(resource.NewWithAttributes(semconv.SchemaURL, attr...)))
 	otel.SetTracerProvider(tp)
 	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{}))
 
