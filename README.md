@@ -6,7 +6,7 @@ This wrapper is designed to write to a Collector/Forwarder service that supports
 
 # Usage
 
-> NOTE: This library writes to a collector endpoint defined by the env var `OTLP_COLLECTOR_ENDPOINT` - ex. localhost:4345 - this env var must be set in your app's environment, and it must point towards a correctly-configured Collector/Forwarder instance.
+> NOTE: This library writes to a collector endpoint defined by the env var `OTLP_COLLECTOR_ENDPOINT` - ex. `localhost:4345` - this env var must be set in your app's environment, and it must point towards a correctly-configured Collector/Forwarder instance.
 
 
 1. Import this library in your Go server `main` routine:
